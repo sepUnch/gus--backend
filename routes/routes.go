@@ -10,7 +10,7 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
 
-	api := r.Group("/api/v1")
+	api := r.Group("/")
 	{
 		// 1. Auth (Public)
 		auth := api.Group("/auth")
@@ -36,12 +36,7 @@ func SetupRouter() *gin.Engine {
 			admin.GET("/submissions/event/:eventId", controllers.GetSubmissionsByEvent)
 		}
 
-		// 4. Shared Routes (Requires Auth, any role)
-		shared := api.Group("/")
-		shared.Use(middleware.AuthMiddleware())
-		{
-			shared.GET("/leaderboard/:eventId", controllers.GetLeaderboard)
-		}
+		api.GET("/leaderboard/:eventId", middleware.AuthMiddleware(), controllers.GetLeaderboard)
 	}
 
 	return r
