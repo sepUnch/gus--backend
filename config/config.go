@@ -29,13 +29,6 @@ func LoadConfig() {
 
 	JWT_SECRET = os.Getenv("JWT_SECRET")
 
-	if dbHost == "" {
-		dbHost = "127.0.0.1"
-	}
-	if dbPort == "" {
-		dbPort = "3306"
-	}
-
 	DB_DSN = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		dbUser,
 		dbPass,
@@ -45,9 +38,9 @@ func LoadConfig() {
 	)
 
 	if JWT_SECRET == "" {
-		log.Fatal("JWT_SECRET not set in .env file")
+		log.Fatal("FATAL: JWT_SECRET not set in .env file or environment")
 	}
-	if dbUser == "" || dbName == "" {
-		log.Fatal("Database credentials not set in .env file")
+	if dbUser == "" || dbName == "" || dbHost == "" || dbPort == "" {
+		log.Fatal("FATAL: Database credentials (DB_HOST, DB_PORT, DB_USERNAME, DB_DATABASE) not set completely in .env file or environment")
 	}
 }
