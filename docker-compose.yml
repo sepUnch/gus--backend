@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+    backend:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        container_name: stujam_backend
+        volumes:
+            - .:/app
+        ports:
+            - "8080:8080"
+        env_file:
+            - .env
+        environment:
+            - DB_HOST=db
+            - DB_PORT=3306
+        networks:
+            - stujam_network
+        depends_on:
+            - db
+
+    frontend:
+        build:
+            context: ../gdgoc-submission-fe-react
+            dockerfile: Dockerfile.dev
+        container_name: stujam_frontend
+        volumes:
+            - ../gdgoc-submission-fe-react:/app
+            - /app/node_modules
+        ports:
+            - "5173:5173"
+        env_file:
+            - .env
+        networks:
+            - stujam_network
+        stdin_open: true
+        tty: true
+
+    db:
+        image: mysql:8.0
+        container_name: stujam_db
+        restart: unless-stopped
+        ports:
+            - "3307:3306"
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        volumes:
+            - mysql_data:/var/lib/mysql
+        networks:
+            - stujam_network
+
+    nginx:
+        image: nginx:alpine
+        container_name: stujam_nginx
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - ./docker/nginx/dev.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            - stujam_network
+        depends_on:
+            - backend
+            - frontend
+
+networks:
+    stujam_network:
+        driver: bridge
+
+volumes:
+    mysql_data:
+        driver: local
