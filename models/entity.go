@@ -41,7 +41,7 @@ type Track struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`
 
-	TrackName   string `json:"track_name"`
+	TrackName   string `json:"track_name" gorm:"unique;size:255"`
 	Description string `json:"description" gorm:"type:text"`
 	CreatedByID uint   `json:"created_by_id"`
 
@@ -56,8 +56,8 @@ type Series struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`
 
-	TrackID          uint      `json:"track_id"`
-	SeriesName       string    `json:"series_name"`
+	TrackID          uint      `json:"track_id" gorm:"uniqueIndex:idx_track_series"`
+	SeriesName       string    `json:"series_name" gorm:"uniqueIndex:idx_track_series;size:255"`
 	Description      string    `json:"description" gorm:"type:text"`
 	Deadline         time.Time `json:"deadline"`
 	OrderIndex       int       `json:"order_index"`
@@ -79,8 +79,8 @@ type Submission struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`
 
-	UserID   uint   `json:"user_id"`
-	SeriesID uint   `json:"series_id"`
+	UserID   uint   `json:"user_id" gorm:"uniqueIndex:idx_user_series"`
+	SeriesID uint   `json:"series_id" gorm:"uniqueIndex:idx_user_series"`
 	FileURL  string `json:"file_url" gorm:"type:text"`
 	Score    int    `json:"score"`
 	Feedback string `json:"feedback" gorm:"type:text"`
