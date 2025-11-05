@@ -51,3 +51,8 @@ type LeaderboardResult struct {
 	TotalScore float64 `json:"total_score"`
 	Rank       int     `json:"rank"`
 }
+
+type UpdateUserRoleInput struct {
+	Role string `json:"role" binding:"required,oneof=admin member"`
+}
+

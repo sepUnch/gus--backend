@@ -41,12 +41,12 @@ func SetupRouter() *gin.Engine {
 		admin.Use(middleware.AuthMiddleware(), middleware.RoleMiddleware("admin"))
 		{
 			admin.POST("/tracks", controllers.CreateTrack)
-
 			admin.POST("/series", controllers.CreateSeries)
 			admin.PATCH("/series/:id/code", controllers.SetSeriesVerificationCode)
-
 			admin.GET("/submissions/series/:seriesId", controllers.GetSubmissionsBySeries)
 			admin.POST("/submissions/grade", controllers.GradeSubmission)
+
+			admin.PATCH("/users/:id/role", controllers.SetUserRole)
 		}
 	}
 
