@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"path/filepath"
+	"time"
+	"os"
 
 	"github.com/Zain0205/gdgoc-subbmission-be-go/database"
 	"github.com/Zain0205/gdgoc-subbmission-be-go/dto"
@@ -17,7 +21,8 @@ type UserController struct {
 
 // ================= GET PROFILE (UNIVERSAL) =================
 func (c *UserController) GetProfile(ctx *gin.Context) {
-	userID, exists := ctx.Get("user_id")
+	// FIX 1: Ganti "user_id" menjadi "userID" agar sesuai dengan Middleware
+	userID, exists := ctx.Get("userID") 
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 		return
@@ -31,64 +36,89 @@ func (c *UserController) GetProfile(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": gin.H{
-			"id":    user.ID,
-			"name":  user.Name,
-			"email": user.Email,
-			"role":  user.Role,
+			"id":     user.ID,
+			"name":   user.Name,
+			"email":  user.Email,
+			"role":   user.Role,
+			"avatar": user.Avatar, // Pastikan model User punya field Avatar
 		},
 	})
 }
 
 // ================= UPDATE PROFILE (MEMBER ONLY) =================
 func (c *UserController) UpdateProfile(ctx *gin.Context) {
-	userID, exists := ctx.Get("user_id")
-	if !exists {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
-		return
-	}
+    userID, exists := ctx.Get("userID")
+    if !exists {
+        ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+        return
+    }
 
-	var req dto.UpdateProfileRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid request body",
-			"error":   err.Error(),
-		})
-		return
-	}
+    // --- DEBUG PRINT (Cek di terminal docker nanti) ---
+    fmt.Println("--- Menerima Request Update Profile ---")
 
-	var user models.User
-	if err := c.DB.First(&user, userID).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
-		return
-	}
+    // Cari User
+    var user models.User
+    if err := c.DB.First(&user, userID).Error; err != nil {
+        ctx.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+        return
+    }
 
-	// Email unik
-	if req.Email != user.Email {
-		var existing models.User
-		if err := c.DB.Where("email = ? AND id != ?", req.Email, userID).
-			First(&existing).Error; err == nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Email already taken"})
-			return
-		}
-	}
+    // 1. Ambil Form Data (JANGAN PAKAI ShouldBindJSON)
+    name := ctx.PostForm("name")
+    email := ctx.PostForm("email")
 
-	user.Name = req.Name
-	user.Email = req.Email
+    if name != "" { user.Name = name }
+    if email != "" { user.Email = email }
 
-	if err := c.DB.Save(&user).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update profile"})
-		return
-	}
+    // 2. Handle Avatar
+    file, err := ctx.FormFile("avatar")
+    if err == nil {
+        fmt.Println("File ditemukan:", file.Filename) // <--- Debug Print
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Profile updated successfully",
-		"data": gin.H{
-			"id":    user.ID,
-			"name":  user.Name,
-			"email": user.Email,
-			"role":  user.Role,
-		},
-	})
+        // Path Folder
+        uploadDir := "public/uploads/avatars"
+        
+        // Pastikan folder ada
+        if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
+             os.MkdirAll(uploadDir, 0777) // Gunakan 0777 di dalam container
+        }
+
+        // Generate nama unik
+        ext := filepath.Ext(file.Filename)
+        filename := fmt.Sprintf("%d_%d%s", userID.(uint), time.Now().Unix(), ext)
+        savePath := filepath.Join(uploadDir, filename)
+
+        // Simpan
+        if err := ctx.SaveUploadedFile(file, savePath); err != nil {
+            fmt.Println("Gagal simpan file:", err.Error()) // <--- Debug Print Error
+            ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to save image"})
+            return
+        }
+
+        // Update DB
+        user.Avatar = "uploads/avatars/" + filename
+    } else {
+        fmt.Println("Tidak ada file avatar yg dikirim/Error:", err.Error()) // <--- Debug Print Error
+    }
+
+    // Simpan ke DB
+    c.DB.Save(&user)
+
+    // Return Response
+    token, _ := utils.GenerateToken(user.ID, user.Role)
+    ctx.JSON(http.StatusOK, gin.H{
+        "message": "Profile updated successfully",
+        "data": gin.H{
+            "token": token,
+            "user": gin.H{
+                "id":     user.ID,
+                "name":   user.Name,
+                "email":  user.Email,
+                "role":   user.Role,
+                "avatar": user.Avatar,
+            },
+        },
+    })
 }
 
 // ================= ADMIN =================

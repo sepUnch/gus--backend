@@ -37,3 +37,6 @@ Thumbs.db
 # Logs and temporary files
 *.log
 *.tmp
+
+# Runtime uploads (Docker / user generated files)
+public/uploads/

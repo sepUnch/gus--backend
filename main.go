@@ -40,6 +40,8 @@ func main() {
 
 	// ROUTES DITEMPATKAN SETELAH CORS
 	routes.RegisterRoutes(r, database.DB)
+
+	r.Static("/uploads", "./public/uploads")
 	
 	log.Println("Starting server on :8080")
 	if err := r.Run(":8080"); err != nil {

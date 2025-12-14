@@ -17,6 +17,7 @@ type User struct {
 	Email        string `json:"email" gorm:"unique;not null"`
 	PasswordHash string `json:"-" gorm:"not null"`
 	Role         string `json:"role" gorm:"type:enum('admin','member');default:'member'"`
+	Avatar       string `json:"avatar"`
 
 	Submissions []Submission `json:"submissions,omitempty" gorm:"foreignKey:UserID"`
 }
