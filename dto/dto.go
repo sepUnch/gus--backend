@@ -11,6 +11,10 @@ type LoginInput struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
+type UpdateProfileRequest struct {
+	Name  string `json:"name" binding:"required"`
+	Email string `json:"email" binding:"required,email"`
+}
 type CreateSubmissionInput struct {
 	SeriesID uint   `json:"series_id" binding:"required"`
 	FileURL  string `json:"file_url" binding:"required"`

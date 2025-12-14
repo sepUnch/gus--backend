@@ -74,6 +74,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	utils.APIResponse(c, http.StatusOK, "Login successful", gin.H{"token": token})
+	utils.APIResponse(c, http.StatusOK, "Login successful", gin.H{
+    "token": token,
+    "user": gin.H{
+        "id":    user.ID,
+        "name":  user.Name,
+        "email": user.Email,
+        "role":  user.Role,
+    },})
 }
 

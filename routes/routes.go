@@ -4,22 +4,26 @@ import (
 	"github.com/Zain0205/gdgoc-subbmission-be-go/controllers"
 	"github.com/Zain0205/gdgoc-subbmission-be-go/middleware"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func SetupRouter() *gin.Engine {
-	r := gin.Default()
-	r.SetTrustedProxies(nil)
+func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 
-	api := r.Group("/")
+	userController := controllers.UserController{DB: db}
+
+	api := r.Group("/api")
 	{
-		// 1. Auth (Public)
+		// ================= AUTH =================
 		auth := api.Group("/auth")
 		{
 			auth.POST("/register", controllers.Register)
 			auth.POST("/login", controllers.Login)
 		}
 
-		// 2. Public Routes (All authenticated users)
+		// ================= UNIVERSAL (LOGIN REQUIRED) =================
+		api.GET("/me", middleware.AuthMiddleware(), userController.GetProfile)
+
+		// ================= PUBLIC =================
 		public := api.Group("/")
 		public.Use(middleware.AuthMiddleware())
 		{
@@ -28,25 +32,38 @@ func SetupRouter() *gin.Engine {
 			public.GET("/leaderboard/track/:trackId", controllers.GetLeaderboardByTrack)
 		}
 
-		// 3. Member Routes
+		// ================= MEMBER =================
 		member := api.Group("/member")
-		member.Use(middleware.AuthMiddleware(), middleware.RoleMiddleware("member"))
+		member.Use(
+			middleware.AuthMiddleware(),
+			middleware.RoleMiddleware("member"),
+		)
 		{
+			member.GET("/me", userController.GetProfile)
+			member.PUT("/me", userController.UpdateProfile)
 			member.POST("/submissions", controllers.CreateSubmission)
 			member.POST("/series/:id/verify", controllers.VerifySeriesCode)
-
 			member.GET("/me/achievements", controllers.GetMyAchievements)
 		}
 
-		// 4. Admin Routes
+		// ================= ADMIN =================
 		admin := api.Group("/admin")
-		admin.Use(middleware.AuthMiddleware(), middleware.RoleMiddleware("admin"))
+		admin.Use(
+			middleware.AuthMiddleware(),
+			middleware.RoleMiddleware("admin"),
+		)
 		{
+			admin.GET("/stats", controllers.GetUserCount)
+
 			admin.POST("/tracks", controllers.CreateTrack)
 			admin.POST("/series", controllers.CreateSeries)
+			admin.GET("/series/:id", controllers.GetSeriesByID)
 			admin.PATCH("/series/:id/code", controllers.SetSeriesVerificationCode)
+
+			admin.GET("/submissions/:id", controllers.GetSubmissionByID)
 			admin.GET("/submissions/series/:seriesId", controllers.GetSubmissionsBySeries)
 			admin.POST("/submissions/grade", controllers.GradeSubmission)
+
 			admin.PATCH("/users/:id/role", controllers.SetUserRole)
 
 			admin.POST("/achievement-types", controllers.CreateAchievementType)
@@ -55,12 +72,10 @@ func SetupRouter() *gin.Engine {
 			admin.POST("/achievements", controllers.CreateAchievement)
 			admin.GET("/achievements", controllers.GetAchievements)
 			admin.PUT("/achievements/:id", controllers.UpdateAchievement)
+			admin.GET("/stats/achievements", controllers.GetAchievementCount)
 
 			admin.POST("/achievements/award", controllers.AwardAchievementToUser)
 			admin.POST("/achievements/revoke", controllers.RevokeAchievementFromUser)
 		}
 	}
-
-	return r
 }
-

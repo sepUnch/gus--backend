@@ -63,3 +63,17 @@ func GetSubmissionsBySeries(c *gin.Context) {
 	utils.APIResponse(c, http.StatusOK, "Submissions fetched successfully", submissions)
 }
 
+func GetSubmissionByID(c *gin.Context) {
+    id := c.Param("id")
+    var submission models.Submission
+
+    // Preload User agar nama member muncul
+    // Preload Series agar nama tugas muncul
+    if err := database.DB.Preload("User").Preload("Series").First(&submission, id).Error; err != nil {
+        utils.APIResponse(c, http.StatusNotFound, "Submission not found", err.Error())
+        return
+    }
+
+    utils.APIResponse(c, http.StatusOK, "Submission fetched successfully", submission)
+}
+
