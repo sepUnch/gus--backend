@@ -1,0 +1,5 @@
+# backend/.dockerignore
+public/uploads
+tmp
+.git
+.env

@@ -33,6 +33,7 @@ type VerifyCodeInput struct {
 type LeaderboardResult struct {
 	UserID     uint    `json:"user_id"`
 	Name       string  `json:"name"`
+	Avatar    string  `json:"avatar"`
 	TotalScore float64 `json:"total_score"`
 	Rank       int     `json:"rank"`
 }
