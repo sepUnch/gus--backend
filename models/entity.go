@@ -65,6 +65,7 @@ type Series struct {
 
 	Description      string    `json:"description" gorm:"type:text"`
 	Deadline         time.Time `json:"deadline"`
+	IsActive         bool      `json:"is_active" gorm:"default:true"`
 	OrderIndex       int       `json:"order_index"`
 	VerificationCode string    `json:"verification_code" gorm:"varchar(6);null"`
 }
