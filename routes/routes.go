@@ -59,6 +59,8 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 			admin.GET("/tracks/:id", controllers.GetTrackWithSeries)
 			admin.POST("/series", controllers.CreateSeries)
 			admin.GET("/series/:id", controllers.GetSeriesByID)
+			admin.PUT("/series/:id", controllers.UpdateSeries)    // Untuk Edit
+			admin.DELETE("/series/:id", controllers.DeleteSeries) // Untuk Hapus
 			admin.PATCH("/series/:id/toggle", controllers.ToggleSeriesStatus)
 			admin.PATCH("/series/:id/code", controllers.SetSeriesVerificationCode)
 
