@@ -53,7 +53,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 			middleware.RoleMiddleware("admin"),
 		)
 		{
-			admin.GET("/dashboard", controllers.GetDashboardData) 
+			admin.GET("/dashboard", controllers.GetDashboardData)
 			admin.GET("/stats", controllers.GetUserCount) // Route lama (opsional dihapus jika sudah diganti dashboard)
 
 			admin.GET("/users", controllers.GetAllUsers)       // <--- List Users
@@ -83,6 +83,8 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 			admin.GET("/achievements", controllers.GetAchievements)
 			admin.PUT("/achievements/:id", controllers.UpdateAchievement)
 			admin.GET("/stats/achievements", controllers.GetAchievementCount)
+			admin.GET("/achievements/:id", controllers.GetAchievementByID)   // <--- Untuk Fetch Data Edit
+			admin.DELETE("/achievements/:id", controllers.DeleteAchievement) // <--- Untuk Delete
 
 			admin.POST("/achievements/award", controllers.AwardAchievementToUser)
 			admin.POST("/achievements/revoke", controllers.RevokeAchievementFromUser)

@@ -169,3 +169,34 @@ func GetAchievementCount(c *gin.Context) {
         "count": count,
     })
 }
+
+// GetAchievementByID (PENTING: Untuk form Edit)
+func GetAchievementByID(c *gin.Context) {
+    id := c.Param("id")
+    var achiev models.Achievement
+
+    if err := database.DB.Preload("Type").First(&achiev, id).Error; err != nil {
+        utils.APIResponse(c, http.StatusNotFound, "Achievement not found", nil)
+        return
+    }
+
+    utils.APIResponse(c, http.StatusOK, "Achievement fetched", achiev)
+}
+
+// DeleteAchievement (PENTING: Untuk tombol Hapus)
+func DeleteAchievement(c *gin.Context) {
+    id := c.Param("id")
+    var achiev models.Achievement
+
+    if err := database.DB.First(&achiev, id).Error; err != nil {
+        utils.APIResponse(c, http.StatusNotFound, "Achievement not found", nil)
+        return
+    }
+
+    if err := database.DB.Delete(&achiev).Error; err != nil {
+        utils.APIResponse(c, http.StatusInternalServerError, "Failed to delete achievement", err.Error())
+        return
+    }
+
+    utils.APIResponse(c, http.StatusOK, "Achievement deleted successfully", nil)
+}
