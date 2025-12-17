@@ -163,3 +163,36 @@ func GetUserCount(c *gin.Context) {
 		},
 	})
 }
+
+// GetAllUsers (Admin Only)
+func GetAllUsers(c *gin.Context) {
+    var users []models.User
+
+    // Mengambil semua user, diurutkan dari yang terbaru
+    if err := database.DB.Order("created_at desc").Find(&users).Error; err != nil {
+        utils.APIResponse(c, http.StatusInternalServerError, "Failed to fetch users", err.Error())
+        return
+    }
+
+    utils.APIResponse(c, http.StatusOK, "Users fetched successfully", users)
+}
+
+// DeleteUser (Admin Only)
+func DeleteUser(c *gin.Context) {
+    id := c.Param("id")
+    var user models.User
+
+    // Cek user ada atau tidak
+    if err := database.DB.First(&user, id).Error; err != nil {
+        utils.APIResponse(c, http.StatusNotFound, "User not found", err.Error())
+        return
+    }
+
+    // Proses Delete (Soft Delete jika pakai gorm.DeletedAt)
+    if err := database.DB.Delete(&user).Error; err != nil {
+        utils.APIResponse(c, http.StatusInternalServerError, "Failed to delete user", err.Error())
+        return
+    }
+
+    utils.APIResponse(c, http.StatusOK, "User deleted successfully", nil)
+}

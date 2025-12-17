@@ -79,3 +79,56 @@ func GetTrackWithSeries(c *gin.Context) {
 
     utils.APIResponse(c, http.StatusOK, "Track fetched successfully", track)
 }
+
+func UpdateTrack(c *gin.Context) {
+    id := c.Param("id")
+    var track models.Track
+
+    // 1. Cek apakah track ada
+    if err := database.DB.First(&track, id).Error; err != nil {
+        utils.APIResponse(c, http.StatusNotFound, "Track not found", err.Error())
+        return
+    }
+
+    // 2. Validasi Input JSON
+    // Kita bisa menggunakan DTO yang sama dengan Create jika field-nya sama
+    var input dto.CreateTrackInput
+    if err := c.ShouldBindJSON(&input); err != nil {
+        utils.APIResponse(c, http.StatusBadRequest, err.Error(), nil)
+        return
+    }
+
+    // 3. Update data
+    track.TrackName = input.TrackName
+    track.Description = input.Description
+    track.TrackType = input.TrackType
+
+    // Simpan perubahan
+    if err := database.DB.Save(&track).Error; err != nil {
+        utils.APIResponse(c, http.StatusInternalServerError, "Failed to update track", err.Error())
+        return
+    }
+
+    utils.APIResponse(c, http.StatusOK, "Track updated successfully", track)
+}
+
+// DeleteTrack (Untuk Hapus Track)
+func DeleteTrack(c *gin.Context) {
+    id := c.Param("id")
+    var track models.Track
+
+    // 1. Cek apakah track ada
+    if err := database.DB.First(&track, id).Error; err != nil {
+        utils.APIResponse(c, http.StatusNotFound, "Track not found", err.Error())
+        return
+    }
+
+    // 2. Hapus Track
+    // Karena Anda menggunakan gorm.DeletedAt di model, ini akan menjadi Soft Delete
+    if err := database.DB.Delete(&track).Error; err != nil {
+        utils.APIResponse(c, http.StatusInternalServerError, "Failed to delete track", err.Error())
+        return
+    }
+
+    utils.APIResponse(c, http.StatusOK, "Track deleted successfully", nil)
+}

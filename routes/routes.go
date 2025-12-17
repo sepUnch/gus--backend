@@ -53,10 +53,16 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 			middleware.RoleMiddleware("admin"),
 		)
 		{
-			admin.GET("/stats", controllers.GetUserCount)
+			admin.GET("/dashboard", controllers.GetDashboardData) 
+			admin.GET("/stats", controllers.GetUserCount) // Route lama (opsional dihapus jika sudah diganti dashboard)
+
+			admin.GET("/users", controllers.GetAllUsers)       // <--- List Users
+			admin.DELETE("/users/:id", controllers.DeleteUser) // <--- Delete User
 
 			admin.POST("/tracks", controllers.CreateTrack)
 			admin.GET("/tracks/:id", controllers.GetTrackWithSeries)
+			admin.PUT("/tracks/:id", controllers.UpdateTrack)    // <--- Tambahkan ini
+			admin.DELETE("/tracks/:id", controllers.DeleteTrack) // <--- Tambahkan ini
 			admin.POST("/series", controllers.CreateSeries)
 			admin.GET("/series/:id", controllers.GetSeriesByID)
 			admin.PUT("/series/:id", controllers.UpdateSeries)    // Untuk Edit

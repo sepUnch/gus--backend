@@ -24,6 +24,14 @@ type CreateScoreInput struct {
 	Score        int    `json:"score" binding:"required,min=0,max=100"`
 	Feedback     string `json:"feedback"`
 }
+type ActivityDTO struct {
+    ID          uint      `json:"id"`
+    Title       string    `json:"title"`       // Nama Track atau Series
+    Type        string    `json:"type"`        // "Track" atau "Series"
+    Action      string    `json:"action"`      // "Added" atau "Updated"
+    Time        time.Time `json:"time"`
+    Description string    `json:"description"` // Opsional (misal nama parent track)
+}
 type SetVerificationCodeInput struct {
 	Code string `json:"code" binding:"required,min=4,max=10"`
 }
