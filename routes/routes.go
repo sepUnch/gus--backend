@@ -44,6 +44,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 			member.POST("/submissions", controllers.CreateSubmission)
 			member.POST("/series/:id/verify", controllers.VerifySeriesCode)
 			member.GET("/me/achievements", controllers.GetMyAchievements)
+			member.GET("/series/:id/comments", controllers.GetCommentsBySeries)
+			member.POST("/series/:id/comments", controllers.CreateComment)
+			member.GET("/tracks/:id/certificate", controllers.DownloadCertificate)
 		}
 
 		// ================= ADMIN =================

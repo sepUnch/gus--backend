@@ -25,12 +25,12 @@ type CreateScoreInput struct {
 	Feedback     string `json:"feedback"`
 }
 type ActivityDTO struct {
-    ID          uint      `json:"id"`
-    Title       string    `json:"title"`       // Nama Track atau Series
-    Type        string    `json:"type"`        // "Track" atau "Series"
-    Action      string    `json:"action"`      // "Added" atau "Updated"
-    Time        time.Time `json:"time"`
-    Description string    `json:"description"` // Opsional (misal nama parent track)
+	ID          uint      `json:"id"`
+	Title       string    `json:"title"`  // Nama Track atau Series
+	Type        string    `json:"type"`   // "Track" atau "Series"
+	Action      string    `json:"action"` // "Added" atau "Updated"
+	Time        time.Time `json:"time"`
+	Description string    `json:"description"` // Opsional (misal nama parent track)
 }
 type SetVerificationCodeInput struct {
 	Code string `json:"code" binding:"required,min=4,max=10"`
@@ -38,10 +38,13 @@ type SetVerificationCodeInput struct {
 type VerifyCodeInput struct {
 	Code string `json:"code" binding:"required"`
 }
+type CreateCommentInput struct {
+	Content string `json:"content" binding:"required"`
+}
 type LeaderboardResult struct {
 	UserID     uint    `json:"user_id"`
 	Name       string  `json:"name"`
-	Avatar    string  `json:"avatar"`
+	Avatar     string  `json:"avatar"`
 	TotalScore float64 `json:"total_score"`
 	Rank       int     `json:"rank"`
 }
@@ -93,4 +96,3 @@ type AwardAchievementInput struct {
 	UserID        uint `json:"user_id" binding:"required"`
 	AchievementID uint `json:"achievement_id" binding:"required"`
 }
-

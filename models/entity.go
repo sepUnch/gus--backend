@@ -111,6 +111,21 @@ type Leaderboard struct {
 	Track Track `json:"track" gorm:"foreignKey:TrackID"`
 }
 
+type Comment struct {
+    ID        uint           `json:"id" gorm:"primarykey"`
+    CreatedAt time.Time      `json:"created_at"`
+    UpdatedAt time.Time      `json:"updated_at"`
+    DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`
+
+    UserID   uint   `json:"user_id"`
+    SeriesID uint   `json:"series_id" gorm:"index"`
+    Content  string `json:"content" gorm:"type:text;not null"`
+
+    // Relasi: Kita butuh data user (nama & avatar) untuk ditampilkan
+    User   User   `json:"user" gorm:"foreignKey:UserID"`
+    Series Series `json:"series" gorm:"foreignKey:SeriesID"`
+}
+
 type AchievementType struct {
 	ID        uint      `json:"id" gorm:"primarykey"`
 	Name      string    `json:"name" gorm:"size:100;unique;not null"`
